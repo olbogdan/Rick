@@ -9,7 +9,19 @@
       [debounce]="600"
       (ionChange)="searchByName($event)"
       (ionClear)="getCharacters()"
-    ></ion-searchbar>
+    >
+  </ion-searchbar>
+
+  <ion-list *ngIf="isSuggestionsAvailable">
+    <ion-item position="floating" >
+      <ion-list style="width: 100%; max-height: 200px; overflow-y: scroll;">
+       <ion-item *ngFor="let name of suggestions" (click)="suggestionSelected(name)" button>
+        <ion-label>{{name}}</ion-label>
+       </ion-item>
+      </ion-list>
+     </ion-item>
+    </ion-list>
+    
   </ion-toolbar>
   <ion-toolbar color="primary" *ngIf="characters?.length > 1">
     <ion-segment mode="md" (ionChange)="filterChanged(filter)" [(ngModel)]="filter">

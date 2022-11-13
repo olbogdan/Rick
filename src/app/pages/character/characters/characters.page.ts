@@ -1,6 +1,6 @@
 import { RickApiService } from 'src/app/services/rick-api.service'
 import { RickAndMortyCharacter } from 'src/app/models/character.model'
-import { RickAndMortyStatus } from 'src/app/models/status.model';
+import { RickAndMortyStatus } from 'src/app/models/status.model'
 import { Component, OnInit, ViewChild } from '@angular/core'
 import {
   InfiniteScrollCustomEvent,
@@ -24,12 +24,15 @@ export class CharactersPage implements OnInit {
   @ViewChild(IonInfiniteScroll) infiniteScroll: IonInfiniteScroll
   characters: RickAndMortyCharacter[]
   private _characters: RickAndMortyCharacter[]
+  private searchQuery: string = null
   currentPage = 1
   filter = Filter.All.valueOf()
+  isSuggestionsAvailable = false
+  suggestions = []
 
   constructor(
     private rickApiService: RickApiService,
-    private loadingCtrl: LoadingController,
+    // private loadingCtrl: LoadingController,
     private toastCtrl: ToastController
   ) { }
 
@@ -44,6 +47,7 @@ export class CharactersPage implements OnInit {
   }
 
   async getCharacters(event?: InfiniteScrollCustomEvent) {
+    this.isSuggestionsAvailable = false
     try {
       this.setCharacters(await this.rickApiService
         .getCharacters()
@@ -67,19 +71,30 @@ export class CharactersPage implements OnInit {
   }
 
   async searchByName(event: SearchbarCustomEvent) {
+    this.isSuggestionsAvailable = true
+    this.searchQuery = event.target.value
     if (event.target.value.length == 0) {
       this.getCharacters()
       return
     }
     const nameToSearch = event.target.value
+    this.search(nameToSearch)
+  }
+
+  suggestionSelected(name: string) {
+    this.isSuggestionsAvailable = false
+    this.search(name)
+  }
+
+  private async search(nameToSearch: string) {    
     if (nameToSearch.length === 0) {
       this.infiniteScroll.disabled = true
       return
     }
-    const requestingDialog = await this.loadingCtrl.create({
-      message: 'Requesting...',
-    })
-    await requestingDialog.present()
+    // const requestingDialog = await this.loadingCtrl.create({
+    //   message: 'Requesting...',
+    // })
+    // await requestingDialog.present()
     try {
       this.setCharacters(await this.rickApiService
         .getCharacters(nameToSearch)
@@ -95,7 +110,7 @@ export class CharactersPage implements OnInit {
       ).present()
     } finally {
       this.infiniteScroll.disabled = false
-      await requestingDialog.dismiss()
+      // await requestingDialog.dismiss()
     }
   }
 
@@ -129,6 +144,21 @@ export class CharactersPage implements OnInit {
     this._characters = chars
     this.disableFilterForSingleItem()
     this.filterCharacters()
+
+    // if the value is an empty string don't filter the items
+    const query = this.searchQuery
+    if (query && query.trim() !== '') {
+        const allSuggestions = this._characters
+          .filter((item) => {
+              return (item.name.toLowerCase().indexOf(query.toLowerCase()) > -1)
+          })
+          .map((item) => {
+            return item.name
+          })
+          this.suggestions = [... new Set(allSuggestions)]
+    } else {
+        this.isSuggestionsAvailable = false
+    }
   }
 
   private disableFilterForSingleItem() {
