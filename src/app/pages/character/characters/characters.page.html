@@ -1,0 +1,65 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Characters</ion-title>
+  </ion-toolbar>
+  <ion-toolbar color="primary">
+    <ion-searchbar
+      placeholder="Seach character by name"
+      [searchIcon]="'Search'"
+      [debounce]="600"
+      (ionChange)="searchByName($event)"
+      (ionClear)="getCharacters()"
+    ></ion-searchbar>
+  </ion-toolbar>
+  <ion-toolbar color="primary" *ngIf="characters?.length > 1">
+    <ion-segment mode="md" (ionChange)="filterChanged(filter)" [(ngModel)]="filter">
+      <ion-segment-button value="All" class="ion-text-uppercase">
+        All
+      </ion-segment-button>
+      <ion-segment-button value="Alive" class="ion-text-uppercase">
+        Alive
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="light">
+  <ion-refresher (ionRefresh)="getCharacters($event)" slot="fixed">
+    <ion-refresher-content
+      [pullingText]="'Loading...'"
+    ></ion-refresher-content>
+  </ion-refresher>
+  <ion-list>
+    <ion-item
+      *ngFor="let character of characters;let i = index"
+      tappable
+      button
+      lines="none"
+      [color]="i%2 === 0 ? '' : 'light'"
+      [routerLink]="'' + character.id"
+    >
+      <ion-avatar slot="start">
+        <img [src]="character.image" />
+      </ion-avatar>
+      <ion-label>
+        <h2>{{character.name}}</h2>
+        <ion-text color="medium">
+          <p>{{character.gender}}</p>
+        </ion-text>
+      </ion-label>
+      <ion-badge
+        slot="end"
+        [color]="character.status === 'Alive' ? 'success' : character.status === 'Dead' ? 'danger' : 'medium'"
+      >
+        <ion-label>{{character.status}}</ion-label>
+      </ion-badge>
+    </ion-item>
+  </ion-list>
+  <ion-infinite-scroll threshold="100px" (ionInfinite)="loadMore($event)">
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Loading more..."
+    >
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>
