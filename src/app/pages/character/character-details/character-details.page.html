@@ -66,6 +66,22 @@
             \'  \' h:mm a':'':'en'}}</h2>
         </ion-label>
       </ion-item>
+      <ion-item>
+        <ion-label>
+          <p>Created</p>
+          <h2>{{character?.created | date:'dd \' \' MMMM \'  \' yyyy
+            \'  \' h:mm a':'':'en'}}</h2>
+        </ion-label>
+      </ion-item>
+
+      <!-- <ion-item>
+        <ion-label>
+          <p>Episode</p>
+          <button ion-item *ngFor="let item of character?.episode" (click)="launch(item)"></button>
+        </ion-label>
+      </ion-item> -->
+
+
     </ion-list>
   </ion-card>
 </ion-content>
